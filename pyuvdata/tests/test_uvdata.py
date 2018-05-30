@@ -3,7 +3,6 @@ import nose.tools as nt
 import os
 import numpy as np
 import copy
-import ephem
 from pyuvdata import UVData
 import pyuvdata.utils as uvutils
 import pyuvdata.tests as uvtest
@@ -46,21 +45,18 @@ class TestUVDataInit(object):
                                  '_gst0', '_rdate', '_earth_omega', '_dut1',
                                  '_timesys', '_uvplane_reference_time',
                                  '_phase_center_ra', '_phase_center_dec',
-                                 '_phase_center_epoch',
-                                 '_zenith_ra', '_zenith_dec']
+                                 '_phase_center_epoch']
 
         self.extra_properties = ['extra_keywords', 'antenna_positions',
                                  'x_orientation', 'antenna_diameters', 'gst0',
                                  'rdate', 'earth_omega', 'dut1', 'timesys',
                                  'uvplane_reference_time',
                                  'phase_center_ra', 'phase_center_dec',
-                                 'phase_center_epoch',
-                                 'zenith_ra', 'zenith_dec']
+                                 'phase_center_epoch']
 
         self.other_properties = ['telescope_location_lat_lon_alt',
                                  'telescope_location_lat_lon_alt_degrees',
                                  'phase_center_ra_degrees', 'phase_center_dec_degrees',
-                                 'zenith_ra_degrees', 'zenith_dec_degrees',
                                  'pyuvdata_version_str']
 
         self.uv_object = UVData()
@@ -310,7 +306,7 @@ def test_phase_unphaseHERA():
     uvtest.checkWarnings(UV_phase.read_miriad, [testfile], {'correct_lat_lon': False},
                          message='Altitude is not present in file and '
                                  'latitude and longitude values do not match')
-    UV_phase.phase(0., 0., ephem.J2000)
+    UV_phase.phase(0., 0., "J2000")
     UV_phase.unphase_to_drift()
 
     nt.assert_equal(UV_raw, UV_phase)
@@ -321,13 +317,13 @@ def test_phase_unphaseHERA():
     nt.assert_raises(ValueError, UV_raw.unphase_to_drift)
 
     # check errors when trying to phase phased or unknown data
-    UV_phase.phase(0., 0., ephem.J2000)
-    nt.assert_raises(ValueError, UV_phase.phase, 0., 0., ephem.J2000)
+    UV_phase.phase(0., 0., "J2000")
+    nt.assert_raises(ValueError, UV_phase.phase, 0., 0., "J2000")
     nt.assert_raises(ValueError, UV_phase.phase_to_time,
                      UV_phase.time_array[0])
 
     UV_phase.set_unknown_phase_type()
-    nt.assert_raises(ValueError, UV_phase.phase, 0., 0., ephem.J2000)
+    nt.assert_raises(ValueError, UV_phase.phase, 0., 0., "J2000")
     nt.assert_raises(ValueError, UV_phase.phase_to_time,
                      UV_phase.time_array[0])
 
@@ -344,8 +340,6 @@ def test_set_phase_unknown():
 
     uv_object.set_unknown_phase_type()
     nt.assert_equal(uv_object.phase_type, 'unknown')
-    nt.assert_false(uv_object._zenith_ra.required)
-    nt.assert_false(uv_object._zenith_dec.required)
     nt.assert_false(uv_object._phase_center_epoch.required)
     nt.assert_false(uv_object._phase_center_ra.required)
     nt.assert_false(uv_object._phase_center_dec.required)
